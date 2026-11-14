@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa de datos · Social Media App</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ─────────────────────────  tokens  ───────────────────────── */
+:root{
+  --ink:#0B1220;
+  --ink-2:#0E1728;
+  --snow:#F8FAFC;
+  --map-muted:#93A4BC;
+  --map-faint:#6F8199;
+  --violet:#8B5CF6;
+  --violet-2:#A78BFA;
+  --teal:#2DD4BF;
+  --green:#34D59A;
+  --blue:#38BDF8;
+  --amber:#FBBF24;
+  --rose:#FB7185;
+  --red:#EF4444;
+  --line:rgba(148,163,184,.18);
+  --font-body:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-display:"Bricolage Grotesque",Inter,ui-sans-serif,system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  font-size:14px;
+  line-height:1.5;
+  color:var(--foreground,#0B1220);
+  background:transparent;
+  overflow-x:hidden;
+}
+::selection{background:rgba(139,92,246,.28)}
+h1,h2,h3,h4,p{margin:0}
+b,strong{font-weight:650}
+svg{display:block}
+.ic{width:1em;height:1em;fill:currentColor;flex:none}
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+.shell{width:100%;max-width:820px;margin:0 auto}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+
+/* ─────────────────────────  hero  ───────────────────────── */
+.hero{padding:14px 0 26px;position:relative}
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.kicker{
+  display:flex;align-items:center;gap:8px;
+  font:500 10px/1 var(--font-mono);
+  letter-spacing:.15em;text-transform:uppercase;
+  color:var(--muted-foreground,#64748B);
+}
+.kicker .live-dot{
+  width:7px;height:7px;border-radius:50%;background:#10B981;
+  box-shadow:0 0 0 4px rgba(16,185,129,.14);
+  animation:pulse 2.6s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(16,185,129,.12)}50%{box-shadow:0 0 0 7px rgba(16,185,129,.03)}}
+.edition{
+  font:500 9px/1 var(--font-mono);letter-spacing:.08em;
+  color:var(--muted-foreground,#64748B);
+  border:1px solid var(--border,#E2E8F0);
+  padding:6px 9px;border-radius:999px;white-space:nowrap;
+}
+.hero-title{
+  margin-top:19px;max-width:720px;
+  font-family:var(--font-display);
+  font-weight:760;
+  font-size:clamp(39px,7.4vw,61px);
+  line-height:.97;
+  letter-spacing:-.038em;
+  text-wrap:balance;
+}
+.hero-title .marker{
+  display:inline-block;white-space:nowrap;
+  color:#fff;padding:0 .15em;margin:0 .02em;
+  border-radius:.16em;
+  background:linear-gradient(135deg,#7C3AED,#4F46E5);
+  transform:rotate(-1.4deg);
+  box-shadow:0 7px 22px -10px rgba(124,58,237,.65);
+}
+.grad{
+  background:linear-gradient(100deg,#8B5CF6 4%,#14B8A6 92%);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+}
+.grad-warm{
+  background:linear-gradient(100deg,#F43F5E 4%,#F59E0B 92%);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+}
+.lede{
+  max-width:650px;margin-top:16px;
+  color:var(--muted-foreground,#64748B);
+  font-size:14.5px;line-height:1.63;
+  text-wrap:pretty;
+}
+.lede b{color:var(--foreground,#0B1220);font-weight:640}
+.hero-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:17px}
+.meta-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 9px;border-radius:999px;
+  border:1px solid var(--border,#E2E8F0);
+  background:color-mix(in srgb,var(--card,#fff) 72%,transparent);
+  font:500 9.5px/1 var(--font-mono);
+  color:var(--muted-foreground,#64748B);
+}
+.meta-pill b{color:var(--foreground,#0B1220);font-weight:600}
+.stack-line{
+  height:3px;border-radius:99px;margin-top:22px;
+  background:linear-gradient(90deg,#8B5CF6,#2DD4BF 48%,#FBBF24 78%,#FB7185);
+  opacity:.85;
+}
+.logo-strip{display:flex;flex-wrap:wrap;gap:5px;margin-top:13px}
+.logo-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 7px 3px 3px;border-radius:7px;
+  border:1px solid var(--border,#E2E8F0);
+  background:var(--card,#fff);
+  color:var(--foreground,#0B1220);
+  font:500 9.5px/1 var(--font-body);
+  white-space:nowrap;
+}
+.logo-chip .tile{width:20px;height:20px;border-radius:5px}
+.logo-chip .tile .ic{width:64%;height:64%}
+
+/* ─────────────────────────  shared bits  ───────────────────────── */
+.section-head{margin:32px 0 14px}
+.eyebrow{
+  display:flex;align-items:center;gap:8px;
+  font:500 10px/1 var(--font-mono);
+  letter-spacing:.15em;text-transform:uppercase;
+  color:var(--muted-foreground,#64748B);
+}
+.eyebrow .num{color:#8B5CF6;font-weight:600}
+.eyebrow::after{content:"";height:1px;flex:1;background:var(--border,#E2E8F0)}
+.section-title{
+  margin-top:9px;
+  font-family:var(--font-display);
+  font-size:clamp(24px,4.4vw,34px);
+  line-height:1.04;letter-spacing:-.028em;
+  font-weight:740;text-wrap:balance;
+}
+.section-sub{
+  margin-top:7px;max-width:620px;
+  color:var(--muted-foreground,#64748B);
+  font-size:12.5px;line-height:1.5;text-wrap:pretty;
+}
+.tile{
+  display:inline-grid;place-items:center;flex:none;
+  background:#fff;
+  border:1px solid rgba(15,23,42,.10);
+  border-radius:6px;
+}
+.tile .ic{width:64%;height:64%}
+.t-next{color:#05070A}
+.t-docker{color:#2496ED}
+.t-render{color:#05070A}
+.t-neon{color:#0FA36B}
+.t-prisma{color:#2D3748}
+.t-redis{color:#D92D20}
+.t-socket{color:#0B0F14}
+.t-ts{color:#3178C6}
+.t-zod{color:#408AFF}
+.t-auth{color:#0B0F14}
+.t-supabase{color:#1F9D6B}
+.t-pg{color:#4169E1}
+.t-react{color:#0891B2}
+.t-github{color:#181717}
+.t-node{color:#3C873A}
+.t-browser{color:#475569}
+.t-logic{color:#B45309}
+
+/* ─────────────────────────  map panel  ───────────────────────── */
+.map-section{margin-top:6px}
+.map-panel{
+  position:relative;overflow:hidden;
+  margin-top:2px;padding:22px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:23px;
+  background:#080E1A;
+  color:#E7ECF5;
+  box-shadow:0 34px 80px -38px rgba(2,6,23,.7);
+}
+.map-panel::before{
+  content:"";position:absolute;inset:-30%;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 18% 0%,rgba(124,58,237,.24),transparent 47%),
+    radial-gradient(ellipse at 92% 55%,rgba(45,212,191,.13),transparent 42%),
+    radial-gradient(ellipse at 44% 105%,rgba(244,63,94,.10),transparent 46%);
+}
+.map-panel::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.032) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.032) 1px,transparent 1px);
+  background-size:22px 22px;
+  mask-image:radial-gradient(ellipse at 50% 20%,#000 25%,transparent 78%);
+  -webkit-mask-image:radial-gradient(ellipse at 50% 20%,#000 25%,transparent 78%);
+}
+.map-inner{position:relative;z-index:1}
+.map-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.map-eyebrow{
+  display:flex;align-items:center;gap:7px;
+  font:500 9px/1 var(--font-mono);letter-spacing:.17em;text-transform:uppercase;
+  color:#7DD3FC;
+}
+.map-eyebrow .dot{width:5px;height:5px;border-radius:50%;background:#2DD4BF;box-shadow:0 0 10px #2DD4BF}
+.map-title{
+  margin-top:6px;
+  font-family:var(--font-display);font-weight:740;
+  font-size:clamp(25px,4.6vw,34px);line-height:1;
+  letter-spacing:-.03em;color:#F8FAFC;
+}
+.map-sub{margin-top:7px;max-width:470px;color:var(--map-muted);font-size:12.5px;line-height:1.55;text-wrap:pretty}
+.map-key{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;max-width:250px;padding-top:3px}
+.key{
+  display:inline-flex;align-items:center;gap:4px;
+  font:500 9px/1 var(--font-mono);letter-spacing:.03em;
+  color:#B6C2D4;border:1px solid rgba(255,255,255,.13);
+  background:rgba(255,255,255,.025);
+  padding:5px 6px;border-radius:999px;
+}
+.key i{display:block;width:12px;height:2px;border-radius:2px}
+.key .k-https{background:#A78BFA}
+.key .k-wss{background:#FB7185}
+.key .k-tcp{background:#2DD4BF}
+.key.dash i{height:0;border-top:1px dashed #34D59A;background:none}
+.stage{
+  display:flex;align-items:center;gap:7px;
+  margin:18px 0 7px;
+  font:600 9.5px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;
+  color:#7E90A8;
+}
+.stage:first-of-type{margin-top:17px}
+.stage .stage-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--c,#8B5CF6);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--c,#8B5CF6) 18%,transparent);
+}
+.stage::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.14),transparent)}
+
+/* nodes */
+.node{
+  position:relative;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:15px;
+  background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.028));
+  padding:12px 13px;
+}
+.node::before{
+  content:"";position:absolute;top:-1px;left:14px;right:14px;height:2px;border-radius:2px;
+  background:var(--accent,#8B5CF6);opacity:.85;
+}
+.node-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.node-head .tile{width:34px;height:34px;border-radius:9px;border-color:rgba(15,23,42,.12);box-shadow:0 4px 14px rgba(0,0,0,.28)}
+.node-id{min-width:0;flex:1}
+.node-title{font-family:var(--font-display);font-size:16px;font-weight:700;line-height:1.05;letter-spacing:-.01em;color:#F1F5F9}
+.node-title span{font-family:var(--font-body);font-size:10px;font-weight:500;color:#8FA1B9;letter-spacing:0}
+.node-kicker{margin-top:3px;font:500 9px/1.2 var(--font-mono);color:#6F8199;letter-spacing:.04em}
+.node-badge{
+  font:600 8px/1 var(--font-mono);color:#7E90A8;
+  border:1px solid rgba(255,255,255,.12);
+  padding:4px 5px;border-radius:5px;letter-spacing:.05em;
+}
+.client-body{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:9px;padding-left:43px}
+.client-copy{min-width:0}
+.client-copy p{font-size:11.5px;line-height:1.5;color:#9FB0C7;max-width:420px}
+.client-copy p b{color:#E2E8F0;font-weight:600}
+.proto-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.proto{font:500 9px/1 var(--font-mono);padding:5px 6px;border-radius:5px;letter-spacing:.03em}
+.proto.https{color:#C4B5FD;background:rgba(139,92,246,.13);border:1px solid rgba(139,92,246,.28)}
+.proto.wss{color:#FDA4AF;background:rgba(251,113,133,.10);border:1px solid rgba(251,113,133,.25)}
+.mini-post{
+  width:142px;flex:none;
+  border:1px solid rgba(255,255,255,.12);border-radius:9px;
+  background:rgba(2,6,23,.42);padding:7px;
+}
+.mini-top{display:flex;align-items:center;gap:5px}
+.mini-avatar{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#FBBF24,#FB7185);flex:none}
+.mini-lines{display:grid;gap:2px;flex:1}
+.mini-lines i{display:block;height:2px;border-radius:2px;background:rgba(255,255,255,.22)}
+.mini-lines i:first-child{width:62%}
+.mini-lines i:last-child{width:38%}
+.mini-img{position:relative;height:35px;margin-top:5px;border-radius:5px;overflow:hidden;background:linear-gradient(135deg,#7C3AED,#2DD4BF 55%,#FBBF24)}
+.mini-img::after{content:"";position:absolute;inset:-40% -10%;background:linear-gradient(25deg,transparent 35%,rgba(255,255,255,.48) 50%,transparent 64%)}
+.mini-actions{display:flex;align-items:center;gap:5px;margin-top:5px;font:500 7px/1 var(--font-mono);color:#8FA1B9}
+.mini-actions .heart{color:#FB7185;font-size:8px}
+
+/* joints */
+.joint{display:flex;flex-direction:column;align-items:center;padding:10px 0 4px}
+.joint-labels{display:flex;flex-wrap:wrap;justify-content:center;gap:5px 11px;font:500 9px/1.1 var(--font-mono);color:#8FA1B9}
+.joint-labels .down{color:#C4B5FD}
+.joint-labels .up{color:#FDA4AF}
+.joint-line{
+  position:relative;width:2px;height:25px;margin-top:4px;border-radius:2px;
+  background:linear-gradient(180deg,#8B5CF6,#2DD4BF);
+  box-shadow:0 0 14px rgba(139,92,246,.35);
+}
+.joint-line::before{
+  content:"";position:absolute;left:50%;top:5px;width:5px;height:5px;border-radius:50%;
+  transform:translateX(-50%);background:#F8FAFC;box-shadow:0 0 10px #A78BFA;
+  animation:travel 2.7s ease-in-out infinite;
+}
+.joint-line::after{
+  content:"";position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);
+  border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid #2DD4BF;
+}
+@keyframes travel{0%,100%{top:4px;opacity:.25}50%{top:17px;opacity:1}}
+.joint-sub{margin-top:5px;font:500 8.5px/1.2 var(--font-mono);color:#5F7189;letter-spacing:.02em;text-align:center}
+
+/* render + docker + next */
+.render-frame{
+  border:1px dashed rgba(45,212,191,.45);
+  background:linear-gradient(180deg,rgba(45,212,191,.06),rgba(45,212,191,.018));
+  border-radius:18px;padding:11px;
+}
+.render-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.render-head .tile{width:28px;height:28px;border-radius:7px}
+.render-title{font-family:var(--font-display);font-size:14.5px;font-weight:700;line-height:1;color:#F0FDFA}
+.render-title span{font-family:var(--font-body);font-size:9px;font-weight:500;color:#7DD3FC}
+.render-sub{margin-top:2px;font-size:9px;line-height:1.3;color:#8FA1B9}
+.render-chips{margin-left:auto;display:flex;gap:3px;flex-wrap:wrap}
+.render-chips span{
+  font:500 8px/1 var(--font-mono);color:#A7F3D0;
+  border:1px solid rgba(45,212,191,.23);background:rgba(45,212,191,.065);
+  padding:4px 5px;border-radius:4px;
+}
+.docker-frame{
+  border:1px solid rgba(56,189,248,.30);
+  background:rgba(56,189,248,.035);
+  border-radius:15px;padding:10px;
+}
+.docker-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+.docker-head .tile{width:26px;height:26px;border-radius:7px}
+.docker-title{font-family:var(--font-display);font-size:13px;font-weight:700;line-height:1;color:#E0F2FE}
+.docker-title span{font-family:var(--font-mono);font-size:7.5px;font-weight:500;color:#7DD3FC}
+.docker-sub{margin-top:2px;font-size:8.8px;line-height:1.35;color:#8FA1B9}
+.docker-head .node-badge{margin-left:auto}
+.docker-sub code,.next-card code,.socket-card code,.bypass code{
+  font:500 .94em/1 var(--font-mono);color:#C7D2FE;
+  background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.05);
+  padding:1px 3px;border-radius:3px;
+}
+.next-card{
+  border:1px solid rgba(255,255,255,.13);
+  background:#0C1424;border-radius:13px;padding:10px;
+}
+.next-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.next-head .tile{width:27px;height:27px;border-radius:7px}
+.next-title{font-family:var(--font-display);font-size:14px;font-weight:700;line-height:1;color:#F8FAFC}
+.next-title span{font-family:var(--font-body);font-size:9px;font-weight:500;color:#8FA1B9}
+.next-sub{margin-top:2px;font-size:8.8px;line-height:1.25;color:#8FA1B9}
+.next-badge{
+  margin-left:auto;font:500 8.5px/1 var(--font-mono);color:#BAE6FD;
+  border:1px solid rgba(56,189,248,.27);background:rgba(56,189,248,.08);
+  padding:4px 5px;border-radius:4px;
+}
+.pipeline{display:grid;grid-template-columns:1fr 15px 1fr 15px 1fr;gap:5px;margin-top:9px}
+.pcard{
+  position:relative;min-width:0;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:9px;padding:7px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c,#8B5CF6) 8%,transparent),rgba(255,255,255,.018));
+}
+.pcard::before{content:"";position:absolute;top:-1px;left:8px;right:8px;height:1.5px;border-radius:2px;background:var(--c,#8B5CF6);opacity:.8}
+.step-no{font:600 8px/1 var(--font-mono);color:#6F8199;letter-spacing:.08em}
+.p-top{display:flex;align-items:center;gap:4px;margin-top:3px;min-width:0;flex-wrap:wrap}
+.p-top .tile{width:19px;height:19px;border-radius:5px}
+.p-name{font:650 10.5px/1.1 var(--font-body);color:#F1F5F9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-role{margin-top:5px;font-size:9.5px;line-height:1.4;color:#93A4BC}
+.p-tag{margin-top:4px;font:500 8px/1.2 var(--font-mono);color:color-mix(in srgb,var(--c,#8B5CF6) 72%,#fff)}
+.pipe-arrow{display:flex;align-items:center;justify-content:center;color:#475569;font:400 13px/1 var(--font-mono)}
+.out-label{display:flex;align-items:center;gap:6px;margin:8px 0 5px;font:500 6.8px/1 var(--font-mono);letter-spacing:.13em;text-transform:uppercase;color:#6F8199}
+.out-label::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.07)}
+.out-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.out{display:flex;align-items:center;gap:4px;min-width:0;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.026);border-radius:6px;padding:4px 5px}
+.out .tile{width:16px;height:16px;border-radius:4px}
+.out b{font:600 9px/1 var(--font-body);color:#E2E8F0;white-space:nowrap}
+.out span:last-child{font:500 7.8px/1 var(--font-mono);color:#6F8199;margin-left:auto;white-space:nowrap}
+.out-note{margin-top:5px;font:500 7.2px/1.3 var(--font-mono);color:#6F8199;letter-spacing:.01em}
+.out-note b{color:#9FB0C7;font-weight:500}
+.socket-joint{display:flex;flex-direction:column;align-items:center;gap:0;padding:3px 0 0}
+.socket-joint span{font:500 7.5px/1 var(--font-mono);color:#5F7189;letter-spacing:.04em}
+.socket-joint i{font-style:normal;color:#FB7185;font:400 9px/1 var(--font-mono);margin-top:1px}
+.socket-card{
+  border:1px solid rgba(251,113,133,.27);
+  background:rgba(251,113,133,.045);
+  border-radius:11px;padding:8px 9px;
+}
+.socket-head{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.socket-head .tile{width:24px;height:24px;border-radius:6px}
+.socket-title{font-family:var(--font-display);font-size:12.5px;font-weight:700;line-height:1;color:#FFF1F2}
+.socket-title span{font-family:var(--font-body);font-size:8.5px;font-weight:500;color:#FDA4AF}
+.socket-role{margin-top:2px;font-size:8.8px;line-height:1.35;color:#9FB0C7}
+.wss-badge{margin-left:auto;font:600 7px/1 var(--font-mono);color:#FDA4AF;border:1px solid rgba(251,113,133,.35);padding:4px 5px;border-radius:4px;background:rgba(251,113,133,.09)}
+.event-row{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.event{font:500 7.8px/1 var(--font-mono);color:#FDA4AF;border:1px solid rgba(251,113,133,.22);background:rgba(251,113,133,.07);padding:3px 4px;border-radius:3px}
+.socket-note{display:flex;align-items:flex-start;gap:4px;margin-top:5px;font:500 7.8px/1.4 var(--font-mono);color:#8FA1B9}
+.socket-note .dot{width:4px;height:4px;border-radius:50%;background:#FB7185;flex:none;margin-top:3px}
+.render-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;margin-top:7px;font:500 7.8px/1.35 var(--font-mono);color:#7E90A8}
+.render-foot span{display:flex;align-items:center;gap:4px}
+.render-foot .ic{width:9px;height:9px}
+
+/* bypass + services */
+.bypass{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin-top:12px;padding:8px 9px;
+  border:1px dashed rgba(52,213,154,.38);
+  background:rgba(52,213,154,.05);
+  border-radius:11px;
+}
+.bypass-label{font:600 8px/1 var(--font-mono);letter-spacing:.13em;color:#6EE7B7;border:1px solid rgba(110,231,183,.3);padding:4px 5px;border-radius:4px}
+.bypass-route{display:flex;align-items:center;gap:4px;flex:none}
+.bypass-route .tile{width:21px;height:21px;border-radius:5px}
+.bypass-dash{position:relative;width:18px;border-top:1px dashed #34D59A}
+.bypass-dash::after{content:"";position:absolute;right:-1px;top:-3px;border-top:3px solid transparent;border-bottom:3px solid transparent;border-left:4px solid #34D59A}
+.bypass p{flex:1;min-width:180px;font-size:9.8px;line-height:1.45;color:#9FB0C7}
+.bypass p b{color:#D1FAE5;font-weight:600}
+.services{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.svc{
+  position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,.10);
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+  border-radius:11px;padding:10px;
+}
+.svc::before{content:"";position:absolute;inset:0 auto 0 0;width:2px;background:var(--svc,#34D59A)}
+.svc-from{display:flex;align-items:center;justify-content:space-between;gap:4px;font:500 8px/1 var(--font-mono);color:#6F8199;letter-spacing:.04em;margin-bottom:6px}
+.svc-from .svc-arrow{color:var(--svc,#34D59A);font-size:9px}
+.svc-head{display:flex;align-items:center;gap:6px;min-width:0}
+.svc-head .tile{width:25px;height:25px;border-radius:6px}
+.svc-name{font-family:var(--font-display);font-size:13.5px;font-weight:700;line-height:1;color:#F1F5F9}
+.svc-kind{margin-top:2px;font:500 7.8px/1 var(--font-mono);color:#7E90A8}
+.svc-role{margin-top:6px;font-size:9.4px;line-height:1.4;color:#B6C2D4}
+.svc-list{list-style:none;margin:5px 0 0;padding:0;display:grid;gap:2px}
+.svc-list li{display:flex;gap:3px;font:500 8.1px/1.35 var(--font-mono);color:#8FA1B9;min-width:0}
+.svc-list li::before{content:"·";color:var(--svc,#34D59A)}
+.svc-tag{margin-top:6px;padding-top:5px;border-top:1px solid rgba(255,255,255,.07);font:500 7.6px/1.25 var(--font-mono);color:color-mix(in srgb,var(--svc,#34D59A) 78%,#fff)}
+
+/* deploy + legend */
+.deploy{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:11px;padding-top:9px;border-top:1px dashed rgba(255,255,255,.12)}
+.deploy-label{font:600 8px/1 var(--font-mono);letter-spacing:.13em;color:#6F8199;margin-right:3px}
+.dep-item{display:inline-flex;align-items:center;gap:4px;font:500 8.5px/1 var(--font-mono);color:#B6C2D4;white-space:nowrap}
+.dep-item .tile{width:16px;height:16px;border-radius:4px}
+.dep-item .ic{width:11px;height:11px;color:#6EE7B7}
+.dep-item.live i{width:5px;height:5px;border-radius:50%;background:#34D59A;box-shadow:0 0 6px #34D59A}
+.dep-arr{color:#475569;font:400 8px/1 var(--font-mono)}
+.map-legend{display:flex;flex-wrap:wrap;gap:6px 13px;margin-top:9px;font:500 8.4px/1 var(--font-mono);color:#6F8199}
+.map-legend span{display:inline-flex;align-items:center;gap:4px}
+.map-legend .lg-line{width:14px;height:2px;background:#A78BFA;border-radius:2px}
+.map-legend .lg-dash{width:14px;height:0;border-top:1px dashed #34D59A}
+.map-legend .lg-dot{width:5px;height:5px;border-radius:50%;background:#FB7185}
+
+/* ─────────────────────────  flows  ───────────────────────── */
+.flows{margin-top:34px}
+.tabs{
+  display:flex;gap:4px;padding:4px;
+  border:1px solid var(--border,#E2E8F0);
+  background:var(--card,#fff);
+  border-radius:12px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:1 0 auto;min-width:max-content;
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  padding:7px 9px;border:0;border-radius:8px;
+  background:transparent;color:var(--muted-foreground,#64748B);
+  font:600 10.5px/1 var(--font-body);
+  cursor:pointer;transition:background .18s,color .18s,transform .18s;
+}
+.tab .tile{width:17px;height:17px;border-radius:4px}
+.tab:hover{color:var(--foreground,#0B1220);background:color-mix(in srgb,var(--foreground,#0B1220) 5%,transparent)}
+.tab[aria-selected="true"]{background:var(--tc,#7C3AED);color:#fff;box-shadow:0 5px 14px -7px color-mix(in srgb,var(--tc,#7C3AED) 80%,transparent)}
+.tab[aria-selected="true"] .tile{border-color:transparent}
+.flow-panel{
+  margin-top:8px;padding:16px;
+  border:1px solid var(--border,#E2E8F0);
+  background:var(--card,#fff);
+  border-radius:16px;
+}
+.flow-panel[hidden]{display:none!important}
+.flow-panel:not([hidden]){animation:rise .3s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.flow-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.flow-kicker{font:600 8px/1 var(--font-mono);letter-spacing:.13em;text-transform:uppercase;color:var(--fc,#7C3AED)}
+.flow-title{margin-top:5px;font-family:var(--font-display);font-size:21px;line-height:1.05;letter-spacing:-.025em;font-weight:740;color:var(--foreground,#0B1220)}
+.flow-sum{margin-top:5px;max-width:540px;color:var(--muted-foreground,#64748B);font-size:11.2px;line-height:1.45;text-wrap:pretty}
+.flow-count{flex:none;font:500 8px/1 var(--font-mono);color:var(--muted-foreground,#64748B);border:1px solid var(--border,#E2E8F0);padding:5px 6px;border-radius:999px;margin-top:2px}
+.steps{list-style:none;margin:12px 0 0;padding:0;position:relative}
+.steps::before{
+  content:"";position:absolute;left:10px;top:10px;bottom:12px;width:1px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--fc,#7C3AED) 45%,transparent),var(--border,#E2E8F0));
+}
+.step{display:grid;grid-template-columns:22px 1fr;gap:9px;padding:4px 0;position:relative}
+.step-dot{
+  position:relative;z-index:1;width:21px;height:21px;border-radius:50%;
+  display:grid;place-items:center;
+  background:var(--card,#fff);
+  border:1px solid color-mix(in srgb,var(--c,#7C3AED) 60%,var(--border,#E2E8F0));
+  color:var(--c,#7C3AED);
+  font:600 7.5px/1 var(--font-mono);
+}
+.step-body{min-width:0}
+.step-tech{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font:600 9.5px/1.1 var(--font-body);color:var(--foreground,#0B1220)}
+.step-tech .tile{width:15px;height:15px;border-radius:4px}
+.step-tech .arrow{font:500 8px/1 var(--font-mono);color:var(--muted-foreground,#64748B);margin:0 1px}
+.step p{margin-top:2px;color:var(--muted-foreground,#64748B);font-size:10.8px;line-height:1.42;text-wrap:pretty}
+.step p code{font:500 8.8px/1 var(--font-mono);color:var(--foreground,#0B1220);background:color-mix(in srgb,var(--foreground,#0B1220) 6%,transparent);padding:1px 3px;border-radius:3px;white-space:nowrap}
+.flow-result{
+  display:flex;align-items:flex-start;gap:7px;margin-top:10px;padding:8px 10px;
+  border:1px solid color-mix(in srgb,var(--fc,#7C3AED) 26%,transparent);
+  background:color-mix(in srgb,var(--fc,#7C3AED) 8%,transparent);
+  border-radius:9px;
+  font-size:10.2px;line-height:1.4;color:var(--foreground,#0B1220);
+}
+.flow-result .ic{width:13px;height:13px;color:var(--fc,#7C3AED);flex:none;margin-top:1px}
+.flow-result b{color:var(--fc,#7C3AED);font-weight:700}
+
+/* ─────────────────────────  rules + closing  ───────────────────────── */
+.rules{margin-top:34px}
+.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.rule{
+  position:relative;overflow:hidden;
+  padding:12px;border:1px solid var(--border,#E2E8F0);
+  background:var(--card,#fff);border-radius:13px;
+}
+.rule::after{content:"";position:absolute;inset:auto -20px -34px auto;width:80px;height:80px;border-radius:50%;background:color-mix(in srgb,var(--rc,#10B981) 10%,transparent)}
+.rule-ico{width:25px;height:25px;border-radius:7px;display:grid;place-items:center;background:color-mix(in srgb,var(--rc,#10B981) 12%,transparent);color:var(--rc,#10B981);margin-bottom:7px}
+.rule-ico .ic{width:14px;height:14px}
+.rule h4{position:relative;z-index:1;font-family:var(--font-display);font-size:13px;line-height:1.15;letter-spacing:-.015em;font-weight:720;color:var(--foreground,#0B1220);text-wrap:balance}
+.rule p{position:relative;z-index:1;margin-top:4px;font-size:10.5px;line-height:1.45;color:var(--muted-foreground,#64748B);text-wrap:pretty}
+.closing{
+  margin-top:26px;padding:17px;
+  border:1px solid var(--border,#E2E8F0);
+  border-radius:17px;
+  background:
+    radial-gradient(ellipse at 0% 0%,color-mix(in srgb,#8B5CF6 13%,transparent),transparent 55%),
+    radial-gradient(ellipse at 100% 100%,color-mix(in srgb,#2DD4BF 11%,transparent),transparent 55%),
+    var(--card,#fff);
+}
+.closing p{margin-top:7px;font-family:var(--font-display);font-size:16px;line-height:1.45;letter-spacing:-.015em;font-weight:600;color:var(--foreground,#0B1220);text-wrap:pretty}
+.closing b{font-weight:760}
+.c-violet{color:#7C3AED}.c-teal{color:#0D9488}.c-blue{color:#2563EB}.c-green{color:#059669}.c-rose{color:#DB2777}.c-amber{color:#B45309}
+.foot{margin:16px 0 0;text-align:center;font:500 8px/1.4 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted-foreground,#64748B)}
+
+/* ─────────────────────────  responsive  ───────────────────────── */
+@media (max-width:700px){
+  .map-key{justify-content:flex-start;max-width:none;padding-top:0}
+}
+@media (max-width:620px){
+  .services{grid-template-columns:1fr;gap:6px}
+  .svc{display:block;padding:10px}
+  .svc-from{margin-bottom:5px}
+  .svc-role{margin-top:5px}
+  .svc-list{margin-top:6px}
+  .render-chips{margin-left:0}
+  .rules-grid{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  .hero{padding-top:8px}
+  .edition{display:none}
+  .hero-title{font-size:clamp(36px,10vw,48px)}
+  .lede{font-size:13.5px}
+  .map-panel{padding:14px;border-radius:18px}
+  .map-head{gap:10px}
+  .map-sub{font-size:10.5px}
+  .map-key{gap:3px}
+  .client-body{padding-left:0;margin-top:8px}
+  .mini-post{display:none}
+  .render-frame{padding:9px}
+  .docker-frame{padding:8px}
+  .pipeline{grid-template-columns:1fr;gap:4px}
+  .pipe-arrow{transform:rotate(90deg);height:11px}
+  .pcard{display:grid;grid-template-columns:22px 1fr;grid-template-rows:auto auto;column-gap:6px;padding:7px}
+  .pcard .step-no{grid-row:1/-1;align-self:center}
+  .p-top{margin-top:0}
+  .p-role{margin-top:3px}
+  .p-tag{display:none}
+  .out-grid{grid-template-columns:1fr;gap:3px}
+  .out{padding:4px 5px}
+  .out b{font-size:8.5px}
+  .flow-panel{padding:13px;min-height:0}
+  .flow-sum{font-size:10.2px}
+  .steps::before{left:9px}
+  .flow-result{font-size:9.4px}
+  .closing p{font-size:14.5px}
+}
+@media (max-width:390px){
+  .map-panel{padding:12px}
+  .node-title{font-size:14px}
+  .bypass p{font-size:8.3px}
+  .flow-title{font-size:19px}
+}
+</style>
+</head>
+<body>
+<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<symbol id="i-nextdotjs" viewBox="0 0 24 24"><path d="M18.665 21.978C16.758 23.255 14.465 24 12 24 5.377 24 0 18.623 0 12S5.377 0 12 0s12 5.377 12 12c0 3.583-1.574 6.801-4.067 9.001L9.219 7.2H7.2v9.596h1.615V9.251l9.85 12.727Zm-3.332-8.533 1.6 2.061V7.2h-1.6v6.245Z"/></symbol>
+<symbol id="i-docker" viewBox="0 0 24 24"><path d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.92 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.082.185.185.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 003.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288Z"/></symbol>
+<symbol id="i-render" viewBox="0 0 24 24"><path d="M18.263.007c-3.121-.147-5.744 2.109-6.192 5.082-.018.138-.045.272-.067.405-.696 3.703-3.936 6.507-7.827 6.507-1.388 0-2.691-.356-3.825-.979a.2024.2024 0 0 0-.302.178V24H12v-8.999c0-1.656 1.338-3 2.987-3h2.988c3.382 0 6.103-2.817 5.97-6.244-.12-3.084-2.61-5.603-5.682-5.75"/></symbol>
+<symbol id="i-neon" viewBox="0 0 24 24"><path d="M24 0V24l-9.365-8.045V24H0V0ZM2.942 21.087h8.751V9.563l9.365 8.204V2.919L2.942 2.914Z"/></symbol>
+<symbol id="i-prisma" viewBox="0 0 24 24"><path d="M21.8068 18.2848L13.5528.7565c-.207-.4382-.639-.7273-1.1286-.7541-.5023-.0293-.9523.213-1.2062.6253L2.266 15.1271c-.2773.4518-.2718 1.0091.0158 1.4555l4.3759 6.7786c.2608.4046.7127.6388 1.1823.6388.1332 0 .267-.0188.3987-.0577l12.7019-3.7568c.3891-.1151.7072-.3904.8737-.7553s.1633-.7828-.0075-1.1454zm-1.8481.7519L9.1814 22.2242c-.3292.0975-.6448-.1873-.5756-.5194l3.8501-18.4386c.072-.3448.5486-.3996.699-.0803l7.1288 15.138c.1344.2856-.019.6224-.325.7128z"/></symbol>
+<symbol id="i-redis" viewBox="0 0 24 24"><path d="M22.71 13.145c-1.66 2.092-3.452 4.483-7.038 4.483-3.203 0-4.397-2.825-4.48-5.12.701 1.484 2.073 2.685 4.214 2.63 4.117-.133 6.94-3.852 6.94-7.239 0-4.05-3.022-6.972-8.268-6.972-3.752 0-8.4 1.428-11.455 3.685C2.59 6.937 3.885 9.958 4.35 9.626c2.648-1.904 4.748-3.13 6.784-3.744C8.12 9.244.886 17.05 0 18.425c.1 1.261 1.66 4.648 2.424 4.648.232 0 .431-.133.664-.365a100.49 100.49 0 0 0 5.54-6.765c.222 3.104 1.748 6.898 6.014 6.898 3.819 0 7.604-2.756 9.33-8.965.2-.764-.73-1.361-1.261-.73zm-4.349-5.013c0 1.959-1.926 2.922-3.685 2.922-.941 0-1.664-.247-2.235-.568 1.051-1.592 2.092-3.225 3.21-4.973 1.972.334 2.71 1.43 2.71 2.619z"/></symbol>
+<symbol id="i-socketdotio" viewBox="0 0 24 24"><path d="M11.9362.0137a12.1694 12.1694 0 00-2.9748.378C4.2816 1.5547.5678 5.7944.0918 10.6012c-.59 4.5488 1.7079 9.2856 5.6437 11.6345 3.8608 2.4179 9.0926 2.3199 12.8734-.223 3.3969-2.206 5.5118-6.2277 5.3858-10.2845-.058-4.0159-2.31-7.9167-5.7588-9.9796C16.354.5876 14.1431.0047 11.9362.0137zm-.063 1.696c4.9448-.007 9.7886 3.8137 10.2815 8.9245.945 5.6597-3.7528 11.4125-9.4875 11.5795-5.4538.544-10.7245-4.0798-10.8795-9.5566-.407-4.4338 2.5159-8.8346 6.6977-10.2995a9.1126 9.1126 0 013.3878-.647zm5.0908 3.2248c-2.6869 2.0849-5.2598 4.3078-7.8886 6.4567 1.2029.017 2.4118.016 3.6208.01 1.41-2.165 2.8589-4.3008 4.2678-6.4667zm-5.6647 7.6536c-1.41 2.166-2.86 4.3088-4.2699 6.4737 2.693-2.0799 5.2548-4.3198 7.9017-6.4557a255.4132 255.4132 0 00-3.6318-.018z"/></symbol>
+<symbol id="i-typescript" viewBox="0 0 24 24"><path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/></symbol>
+<symbol id="i-zod" viewBox="0 0 24 24"><path d="M2.584 3.582a2.247 2.247 0 0 1 2.112-1.479h14.617c.948 0 1.794.595 2.115 1.487l2.44 6.777a2.248 2.248 0 0 1-.624 2.443l-9.61 8.52a2.247 2.247 0 0 1-2.963.018L.776 12.773a2.248 2.248 0 0 1-.64-2.467Zm12.038 4.887-9.11 5.537 5.74 5.007c.456.399 1.139.396 1.593-.006l5.643-5.001H14.4l6.239-3.957c.488-.328.69-.947.491-1.5l-1.24-3.446a1.535 1.535 0 0 0-1.456-1.015H5.545a1.535 1.535 0 0 0-1.431 1.01l-1.228 3.37z"/></symbol>
+<symbol id="i-betterauth" viewBox="0 0 24 24"><path d="M0 3.39v17.22h5.783V15.06h6.434V8.939H5.783V3.39ZM12.217 8.94h5.638v6.122h-5.638v5.548H24V3.391H12.217Z"/></symbol>
+<symbol id="i-supabase" viewBox="0 0 24 24"><path d="M11.9 1.036c-.015-.986-1.26-1.41-1.874-.637L.764 12.05C-.33 13.427.65 15.455 2.409 15.455h9.579l.113 7.51c.014.985 1.259 1.408 1.873.636l9.262-11.653c1.093-1.375.113-3.403-1.645-3.403h-9.642z"/></symbol>
+<symbol id="i-postgresql" viewBox="0 0 24 24"><path d="M23.5594 14.7228a.5269.5269 0 0 0-.0563-.1191c-.139-.2632-.4768-.3418-1.0074-.2321-1.6533.3411-2.2935.1312-2.5256-.0191 1.342-2.0482 2.445-4.522 3.0411-6.8297.2714-1.0507.7982-3.5237.1222-4.7316a1.5641 1.5641 0 0 0-.1509-.235C21.6931.9086 19.8007.0248 17.5099.0005c-1.4947-.0158-2.7705.3461-3.1161.4794a9.449 9.449 0 0 0-.5159-.0816 8.044 8.044 0 0 0-1.3114-.1278c-1.1822-.0184-2.2038.2642-3.0498.8406-.8573-.3211-4.7888-1.645-7.2219.0788C.9359 2.1526.3086 3.8733.4302 6.3043c.0409.818.5069 3.334 1.2423 5.7436.4598 1.5065.9387 2.7019 1.4334 3.582.553.9942 1.1259 1.5933 1.7143 1.7895.4474.1491 1.1327.1441 1.8581-.7279.8012-.9635 1.5903-1.8258 1.9446-2.2069.4351.2355.9064.3625 1.39.3772a.0569.0569 0 0 0 .0004.0041 11.0312 11.0312 0 0 0-.2472.3054c-.3389.4302-.4094.5197-1.5002.7443-.3102.064-1.1344.2339-1.1464.8115-.0025.1224.0329.2309.0919.3268.2269.4231.9216.6097 1.015.6331 1.3345.3335 2.5044.092 3.3714-.6787-.017 2.231.0775 4.4174.3454 5.0874.2212.5529.7618 1.9045 2.4692 1.9043.2505 0 .5263-.0291.8296-.0941 1.7819-.3821 2.5557-1.1696 2.855-2.9059.1503-.8707.4016-2.8753.5388-4.1012.0169-.0703.0357-.1207.057-.1362.0007-.0005.0697-.0471.4272.0307a.3673.3673 0 0 0 .0443.0068l.2539.0223.0149.001c.8468.0384 1.9114-.1426 2.5312-.4308.6438-.2988 1.8057-1.0323 1.5951-1.6698zM2.371 11.8765c-.7435-2.4358-1.1779-4.8851-1.2123-5.5719-.1086-2.1714.4171-3.6829 1.5623-4.4927 1.8367-1.2986 4.8398-.5408 6.108-.13-.0032.0032-.0066.0061-.0098.0094-2.0238 2.044-1.9758 5.536-1.9708 5.7495-.0002.0823.0066.1989.0162.3593.0348.5873.0996 1.6804-.0735 2.9184-.1609 1.1504.1937 2.2764.9728 3.0892.0806.0841.1648.1631.2518.2374-.3468.3714-1.1004 1.1926-1.9025 2.1576-.5677.6825-.9597.5517-1.0886.5087-.3919-.1307-.813-.5871-1.2381-1.3223-.4796-.839-.9635-2.0317-1.4155-3.5126zm6.0072 5.0871c-.1711-.0428-.3271-.1132-.4322-.1772.0889-.0394.2374-.0902.4833-.1409 1.2833-.2641 1.4815-.4506 1.9143-1.0002.0992-.126.2116-.2687.3673-.4426a.3549.3549 0 0 0 .0737-.1298c.1708-.1513.2724-.1099.4369-.0417.156.0646.3078.26.3695.4752.0291.1016.0619.2945-.0452.4444-.9043 1.2658-2.2216 1.2494-3.1676 1.0128zm2.094-3.988-.0525.141c-.133.3566-.2567.6881-.3334 1.003-.6674-.0021-1.3168-.2872-1.8105-.8024-.6279-.6551-.9131-1.5664-.7825-2.5004.1828-1.3079.1153-2.4468.079-3.0586-.005-.0857-.0095-.1607-.0122-.2199.2957-.2621 1.6659-.9962 2.6429-.7724.4459.1022.7176.4057.8305.928.5846 2.7038.0774 3.8307-.3302 4.7363-.084.1866-.1633.3629-.2311.5454zm7.3637 4.5725c-.0169.1768-.0358.376-.0618.5959l-.146.4383a.3547.3547 0 0 0-.0182.1077c-.0059.4747-.054.6489-.115.8693-.0634.2292-.1353.4891-.1794 1.0575-.11 1.4143-.8782 2.2267-2.4172 2.5565-1.5155.3251-1.7843-.4968-2.0212-1.2217a6.5824 6.5824 0 0 0-.0769-.2266c-.2154-.5858-.1911-1.4119-.1574-2.5551.0165-.5612-.0249-1.9013-.3302-2.6462.0044-.2932.0106-.5909.019-.8918a.3529.3529 0 0 0-.0153-.1126 1.4927 1.4927 0 0 0-.0439-.208c-.1226-.4283-.4213-.7866-.7797-.9351-.1424-.059-.4038-.1672-.7178-.0869.067-.276.1831-.5875.309-.9249l.0529-.142c.0595-.16.134-.3257.213-.5012.4265-.9476 1.0106-2.2453.3766-5.1772-.2374-1.0981-1.0304-1.6343-2.2324-1.5098-.7207.0746-1.3799.3654-1.7088.5321a5.6716 5.6716 0 0 0-.1958.1041c.0918-1.1064.4386-3.1741 1.7357-4.4823a4.0306 4.0306 0 0 1 .3033-.276.3532.3532 0 0 0 .1447-.0644c.7524-.5706 1.6945-.8506 2.802-.8325.4091.0067.8017.0339 1.1742.081 1.939.3544 3.2439 1.4468 4.0359 2.3827.8143.9623 1.2552 1.9315 1.4312 2.4543-1.3232-.1346-2.2234.1268-2.6797.779-.9926 1.4189.543 4.1729 1.2811 5.4964.1353.2426.2522.4522.2889.5413.2403.5825.5515.9713.7787 1.2552.0696.087.1372.1714.1885.245-.4008.1155-1.1208.3825-1.0552 1.717-.0123.1563-.0423.4469-.0834.8148-.0461.2077-.0702.4603-.0994.7662zm.8905-1.6211c-.0405-.8316.2691-.9185.5967-1.0105a2.8566 2.8566 0 0 0 .135-.0406 1.202 1.202 0 0 0 .1342.103c.5703.3765 1.5823.4213 3.0068.1344-.2016.1769-.5189.3994-.9533.6011-.4098.1903-1.0957.333-1.7473.3636-.7197.0336-1.0859-.0807-1.1721-.151zm.5695-9.2712c-.0059.3508-.0542.6692-.1054 1.0017-.055.3576-.112.7274-.1264 1.1762-.0142.4368.0404.8909.0932 1.3301.1066.887.216 1.8003-.2075 2.7014a3.5272 3.5272 0 0 1-.1876-.3856c-.0527-.1276-.1669-.3326-.3251-.6162-.6156-1.1041-2.0574-3.6896-1.3193-4.7446.3795-.5427 1.3408-.5661 2.1781-.463zm.2284 7.0137a12.3762 12.3762 0 0 0-.0853-.1074l-.0355-.0444c.7262-1.1995.5842-2.3862.4578-3.4385-.0519-.4318-.1009-.8396-.0885-1.2226.0129-.4061.0666-.7543.1185-1.0911.0639-.415.1288-.8443.1109-1.3505.0134-.0531.0188-.1158.0118-.1902-.0457-.4855-.5999-1.938-1.7294-3.253-.6076-.7073-1.4896-1.4972-2.6889-2.0395.5251-.1066 1.2328-.2035 2.0244-.1859 2.0515.0456 3.6746.8135 4.8242 2.2824a.908.908 0 0 1 .0667.1002c.7231 1.3556-.2762 6.2751-2.9867 10.5405zm-8.8166-6.1162c-.025.1794-.3089.4225-.6211.4225a.5821.5821 0 0 1-.0809-.0056c-.1873-.026-.3765-.144-.5059-.3156-.0458-.0605-.1203-.178-.1055-.2844.0055-.0401.0261-.0985.0925-.1488.1182-.0894.3518-.1226.6096-.0867.3163.0441.6426.1938.6113.4186zm7.9305-.4114c.0111.0792-.049.201-.1531.3102-.0683.0717-.212.1961-.4079.2232a.5456.5456 0 0 1-.075.0052c-.2935 0-.5414-.2344-.5607-.3717-.024-.1765.2641-.3106.5611-.352.297-.0414.6111.0088.6356.1851z"/></symbol>
+<symbol id="i-react" viewBox="0 0 24 24"><path d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z"/></symbol>
+<symbol id="i-github" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
+<symbol id="i-nodedotjs" viewBox="0 0 24 24"><path d="M11.998,24c-0.321,0-0.641-0.084-0.922-0.247l-2.936-1.737c-0.438-0.245-0.224-0.332-0.08-0.383 c0.585-0.203,0.703-0.25,1.328-0.604c0.065-0.037,0.151-0.023,0.218,0.017l2.256,1.339c0.082,0.045,0.197,0.045,0.272,0l8.795-5.076 c0.082-0.047,0.134-0.141,0.134-0.238V6.921c0-0.099-0.053-0.192-0.137-0.242l-8.791-5.072c-0.081-0.047-0.189-0.047-0.271,0 L3.075,6.68C2.99,6.729,2.936,6.825,2.936,6.921v10.15c0,0.097,0.054,0.189,0.139,0.235l2.409,1.392 c1.307,0.654,2.108-0.116,2.108-0.89V7.787c0-0.142,0.114-0.253,0.256-0.253h1.115c0.139,0,0.255,0.112,0.255,0.253v10.021 c0,1.745-0.95,2.745-2.604,2.745c-0.508,0-0.909,0-2.026-0.551L2.28,18.675c-0.57-0.329-0.922-0.945-0.922-1.604V6.921 c0-0.659,0.353-1.275,0.922-1.603l8.795-5.082c0.557-0.315,1.296-0.315,1.848,0l8.794,5.082c0.57,0.329,0.924,0.944,0.924,1.603 v10.15c0,0.659-0.354,1.273-0.924,1.604l-8.794,5.078C12.643,23.916,12.324,24,11.998,24z M19.099,13.993 c0-1.9-1.284-2.406-3.987-2.763c-2.731-0.361-3.009-0.548-3.009-1.187c0-0.528,0.235-1.233,2.258-1.233 c1.807,0,2.473,0.389,2.747,1.607c0.024,0.115,0.129,0.199,0.247,0.199h1.141c0.071,0,0.138-0.031,0.186-0.081 c0.048-0.054,0.074-0.123,0.067-0.196c-0.177-2.098-1.571-3.076-4.388-3.076c-2.508,0-4.004,1.058-4.004,2.833 c0,1.925,1.488,2.457,3.895,2.695c2.88,0.282,3.103,0.703,3.103,1.269c0,0.983-0.789,1.402-2.642,1.402 c-2.327,0-2.839-0.584-3.011-1.742c-0.02-0.124-0.126-0.215-0.253-0.215h-1.137c-0.141,0-0.254,0.112-0.254,0.253 c0,1.482,0.806,3.248,4.655,3.248C17.501,17.007,19.099,15.91,19.099,13.993z"/></symbol>
+</svg>
+
+<main class="shell">
+
+  <!-- ══════════════ hero ══════════════ -->
+  <section class="hero">
+    <div class="hero-top">
+      <div class="kicker"><span class="live-dot"></span> mapa conceptual · social media app</div>
+      <div class="edition">v1.0 · 11 piezas</div>
+    </div>
+
+    <h1 class="hero-title">De un <span class="marker">tap</span> a <span class="grad">Neon</span>.<br>Y de vuelta <span class="grad-warm">a todos</span>.</h1>
+
+    <p class="lede">Next.js dentro de <b>Docker</b> sobre <b>Render</b>. Prisma apuntando a <b>Neon</b>. Redis como tejido conectivo. Socket.IO para el directo. Better Auth para la identidad, Zod para la confianza y Supabase para las imágenes. <b>Sigue el viaje de un dato.</b></p>
+
+    <div class="hero-meta">
+      <span class="meta-pill"><b>11</b> herramientas</span>
+      <span class="meta-pill"><b>3</b> servicios externos</span>
+      <span class="meta-pill"><b>4</b> recorridos</span>
+      <span class="meta-pill"><b>1</b> contenedor</span>
+    </div>
+
+    <div class="stack-line"></div>
+
+    <div class="logo-strip" aria-label="Tecnologías del stack">
+      <span class="logo-chip"><span class="tile t-next"><svg class="ic"><use href="#i-nextdotjs"/></svg></span>Next.js</span>
+      <span class="logo-chip"><span class="tile t-docker"><svg class="ic"><use href="#i-docker"/></svg></span>Docker</span>
+      <span class="logo-chip"><span class="tile t-render"><svg class="ic"><use href="#i-render"/></svg></span>Render</span>
+      <span class="logo-chip"><span class="tile t-neon"><svg class="ic"><use href="#i-neon"/></svg></span>Neon</span>
+      <span class="logo-chip"><span class="tile t-prisma"><svg class="ic"><use href="#i-prisma"/></svg></span>Prisma</span>
+      <span class="logo-chip"><span class="tile t-redis"><svg class="ic"><use href="#i-redis"/></svg></span>Redis</span>
+      <span class="logo-chip"><span class="tile t-socket"><svg class="ic"><use href="#i-socketdotio"/></svg></span>Socket.IO</span>
+      <span class="logo-chip"><span class="tile t-auth"><svg class="ic"><use href="#i-betterauth"/></svg></span>Better Auth</span>
+      <span class="logo-chip"><span class="tile t-ts"><svg class="ic"><use href="#i-typescript"/></svg></span>TypeScript</span>
+      <span class="logo-chip"><span class="tile t-zod"><svg class="ic"><use href="#i-zod"/></svg></span>Zod</span>
+      <span class="logo-chip"><span class="tile t-supabase"><svg class="ic"><use href="#i-supabase"/></svg></span>Supabase</span>
+    </div>
+  </section>
+
+  <!-- ══════════════ map ══════════════ -->
+  <section class="map-section" aria-labelledby="map-title">
+    <div class="section-head">
+      <div class="eyebrow"><span class="num">01</span> el mapa</div>
+      <h2 class="section-title" id="map-title">Todo se habla con todo.</h2>
+      <p class="section-sub">De arriba abajo: lo que ve el usuario, lo que ejecuta Render y lo que guardan los servicios. Cada request hace este viaje.</p>
+    </div>
+
+    <div class="map-panel">
+      <div class="map-inner">
+
+        <div class="map-head">
+          <div>
+            <div class="map-eyebrow"><span class="dot"></span> arquitectura + flujo</div>
+            <h3 class="map-title">El viaje completo.</h3>
+            <p class="map-sub">Sigue las líneas: el navegador pide, el contenedor orquesta, los servicios responden. Las conexiones punteadas son atajos que no pasan por tu servidor.</p>
+          </div>
+          <div class="map-key" aria-label="Leyenda de protocolos">
+            <span class="key"><i class="k-https"></i>HTTPS</span>
+            <span class="key"><i class="k-wss"></i>WSS</span>
+            <span class="key"><i class="k-tcp"></i>TCP</span>
+            <span class="key dash"><i></i>atajo</span>
+          </div>
+        </div>
+
+        <!-- CLIENTE -->
+        <div class="stage"><span class="stage-dot" style="--c:#A78BFA"></span>cliente</div>
+        <article class="node" style="--accent:#8B5CF6">
+          <div class="node-head">
+            <span class="tile t-react"><svg class="ic"><use href="#i-react"/></svg></span>
+            <div class="node-id">
+              <div class="node-title">Cliente <span>· navegador / PWA</span></div>
+              <div class="node-kicker">react 19 · fetch · socket.io-client</div>
+            </div>
+            <span class="node-badge">01</span>
+          </div>
+          <div class="client-body">
+            <div class="client-copy">
+              <p>El usuario toca, escribe y sube fotos. La UI habla dos idiomas: <b>HTTP</b> para pedir y <b>WSS</b> para escuchar lo que pasa.</p>
+              <div class="proto-row">
+                <span class="proto https">HTTPS · fetch / RSC</span>
+                <span class="proto wss">WSS · eventos en vivo</span>
+              </div>
+            </div>
+            <div class="mini-post" aria-hidden="true">
+              <div class="mini-top">
+                <span class="mini-avatar"></span>
+                <div class="mini-lines"><i></i><i></i></div>
+              </div>
+              <div class="mini-img"></div>
+              <div class="mini-actions"><span class="heart">♥</span><span>24</span><span>·</span><span>3 comentarios</span></div>
+            </div>
+          </div>
+        </article>
+
+        <div class="joint">
+          <div class="joint-labels"><span class="down">↓ petición</span><span class="up">↑ respuesta + eventos</span></div>
+          <div class="joint-line"></div>
+          <div class="joint-sub">render termina el TLS · todo entra por el mismo dominio</div>
+        </div>
+
+        <!-- RENDER + DOCKER -->
+        <div class="stage"><span class="stage-dot" style="--c:#2DD4BF"></span>plataforma · render + docker</div>
+        <div class="render-frame">
+          <div class="render-head">
+            <span class="tile t-render"><svg class="ic"><use href="#i-render"/></svg></span>
+            <div>
+              <div class="render-title">Render <span>· PaaS</span></div>
+              <div class="render-sub">build desde GitHub · TLS · dominio · health checks · deploy sin downtime</div>
+            </div>
+            <div class="render-chips"><span>TLS</span><span>WSS</span><span>zero-downtime</span></div>
+          </div>
+
+          <div class="docker-frame">
+            <div class="docker-head">
+              <span class="tile t-docker"><svg class="ic"><use href="#i-docker"/></svg></span>
+              <div>
+                <div class="docker-title">Docker <span>· node:22-alpine</span></div>
+                <div class="docker-sub">Next.js + Socket.IO en un solo proceso · escucha en <code>$PORT</code> · misma imagen en local y en Render</div>
+              </div>
+              <span class="node-badge">02</span>
+            </div>
+
+            <div class="next-card">
+              <div class="next-head">
+                <span class="tile t-next"><svg class="ic"><use href="#i-nextdotjs"/></svg></span>
+                <div>
+                  <div class="next-title">Next.js <span>· App Router</span></div>
+                  <div class="next-sub">renderiza la UI y orquesta cada request</div>
+                </div>
+                <span class="next-badge">fullstack</span>
+              </div>
+
+              <div class="pipeline">
+                <div class="pcard" style="--c:#8B5CF6">
+                  <div class="step-no">01</div>
+                  <div class="p-top"><span class="tile t-auth"><svg class="ic"><use href="#i-betterauth"/></svg></span><span class="p-name">Better Auth</span></div>
+                  <p class="p-role">¿Quién eres? Sesión, OAuth y cookies.</p>
+                  <div class="p-tag">sesión · oauth</div>
+                </div>
+                <div class="pipe-arrow" aria-hidden="true">→</div>
+                <div class="pcard" style="--c:#408AFF">
+                  <div class="step-no">02</div>
+                  <div class="p-top"><span class="tile t-ts"><svg class="ic"><use href="#i-typescript"/></svg></span><span class="tile t-zod"><svg class="ic"><use href="#i-zod"/></svg></span><span class="p-name">TS + Zod</span></div>
+                  <p class="p-role">¿Es válido? Tipos al compilar, datos al runtime.</p>
+                  <div class="p-tag">validación · env</div>
+                </div>
+                <div class="pipe-arrow" aria-hidden="true">→</div>
+                <div class="pcard" style="--c:#F59E0B">
+                  <div class="step-no">03</div>
+                  <div class="p-top"><span class="tile t-logic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></span><span class="p-name">Tu lógica</span></div>
+                  <p class="p-role">¿Qué hacemos? Server Actions, APIs y reglas.</p>
+                  <div class="p-tag">actions · routes</div>
+                </div>
+              </div>
+
+              <div class="out-label">clientes de salida · solo en el servidor</div>
+              <div class="out-grid">
+                <div class="out"><span class="tile t-prisma"><svg class="ic"><use href="#i-prisma"/></svg></span><b>Prisma</b><span>→ Neon</span></div>
+                <div class="out"><span class="tile t-redis"><svg class="ic"><use href="#i-redis"/></svg></span><b>ioredis</b><span>→ Redis</span></div>
+                <div class="out"><span class="tile t-supabase"><svg class="ic"><use href="#i-supabase"/></svg></span><b>supabase-js</b><span>→ Storage</span></div>
+              </div>
+              <div class="out-note"><b>Prisma</b> traduce a SQL · <b>ioredis</b> cachea · <b>supabase-js</b> firma uploads</div>
+            </div>
+
+            <div class="socket-joint"><span>la lógica llama io.emit()</span><i>↓</i></div>
+
+            <div class="socket-card">
+              <div class="socket-head">
+                <span class="tile t-socket"><svg class="ic"><use href="#i-socketdotio"/></svg></span>
+                <div>
+                  <div class="socket-title">Socket.IO <span>· tiempo real</span></div>
+                  <div class="socket-role">Mantiene el canal WSS abierto y empuja eventos a salas.</div>
+                </div>
+                <span class="wss-badge">WSS</span>
+              </div>
+              <div class="event-row">
+                <span class="event">post:new</span><span class="event">like:new</span><span class="event">comment:new</span><span class="event">typing</span><span class="event">presence</span>
+              </div>
+              <div class="socket-note"><span class="dot"></span><span>Redis adapter ⇄ pub/sub entre instancias · handshake con la cookie de Better Auth</span></div>
+            </div>
+          </div>
+
+          <div class="render-foot">
+            <span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Render termina TLS y enruta al contenedor</span>
+            <span>dentro: HTTP / WSS en <code>$PORT</code></span>
+          </div>
+        </div>
+
+        <div class="joint">
+          <div class="joint-labels"><span class="down">↓ queries · caché · firmas</span><span class="up">↑ datos · confirmaciones</span></div>
+          <div class="joint-line"></div>
+          <div class="joint-sub">tres protocolos, tres trabajos distintos</div>
+        </div>
+
+        <!-- SERVICIOS -->
+        <div class="stage"><span class="stage-dot" style="--c:#34D59A"></span>servicios externos</div>
+        <div class="services">
+          <article class="svc" style="--svc:#34D59A">
+            <div class="svc-from"><span>vía prisma</span><span class="svc-arrow">↓</span></div>
+            <div class="svc-head">
+              <span class="tile t-neon"><svg class="ic"><use href="#i-neon"/></svg></span>
+              <div><div class="svc-name">Neon</div><div class="svc-kind">Postgres serverless</div></div>
+            </div>
+            <p class="svc-role">La fuente de la verdad. Todo lo que no puede perderse.</p>
+            <ul class="svc-list">
+              <li>User · Session · Account</li>
+              <li>Post · Like · Comment</li>
+              <li>Follow · ruta del media</li>
+            </ul>
+            <div class="svc-tag">TCP pooled · migraciones con Prisma</div>
+          </article>
+
+          <article class="svc" style="--svc:#FF5A4E">
+            <div class="svc-from"><span>vía ioredis</span><span class="svc-arrow">↓</span></div>
+            <div class="svc-head">
+              <span class="tile t-redis"><svg class="ic"><use href="#i-redis"/></svg></span>
+              <div><div class="svc-name">Redis</div><div class="svc-kind">memoria rápida</div></div>
+            </div>
+            <p class="svc-role">La capa que hace que todo vuele. Se puede reconstruir.</p>
+            <ul class="svc-list">
+              <li>feed:user:{id} · rate limit</li>
+              <li>contadores · presencia</li>
+              <li>pub/sub para Socket.IO</li>
+            </ul>
+            <div class="svc-tag">TCP · ioredis · TTL corto</div>
+          </article>
+
+          <article class="svc" style="--svc:#3FCF8E">
+            <div class="svc-from"><span>vía supabase-js</span><span class="svc-arrow">↓</span></div>
+            <div class="svc-head">
+              <span class="tile t-supabase"><svg class="ic"><use href="#i-supabase"/></svg></span>
+              <div><div class="svc-name">Supabase</div><div class="svc-kind">Storage + CDN</div></div>
+            </div>
+            <p class="svc-role">Las imágenes viven fuera de Neon y fuera de Render.</p>
+            <ul class="svc-list">
+              <li>bucket: posts / avatars</li>
+              <li>URLs firmadas de subida</li>
+              <li>CDN + transformaciones</li>
+            </ul>
+            <div class="svc-tag">HTTPS · service key server-only</div>
+          </article>
+        </div>
+
+        <div class="bypass">
+          <span class="bypass-label">ATAJO</span>
+          <div class="bypass-route" aria-hidden="true">
+            <span class="tile t-browser"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><circle cx="6.2" cy="6.5" r=".55" fill="currentColor" stroke="none"/></svg></span>
+            <span class="bypass-dash"></span>
+            <span class="tile t-supabase"><svg class="ic"><use href="#i-supabase"/></svg></span>
+          </div>
+          <p><b>La imagen no pasa por tu servidor.</b> El navegador la sube directo a Supabase Storage con una URL firmada; el contenedor solo firma y guarda la ruta en Neon. Menos RAM, menos CPU, menos ancho de banda.</p>
+        </div>
+
+        <div class="deploy">
+          <span class="deploy-label">DEL REPO AL AIRE</span>
+          <span class="dep-item"><span class="tile t-github"><svg class="ic"><use href="#i-github"/></svg></span>git push</span>
+          <span class="dep-arr">→</span>
+          <span class="dep-item"><span class="tile t-render"><svg class="ic"><use href="#i-render"/></svg></span>Render build</span>
+          <span class="dep-arr">→</span>
+          <span class="dep-item"><span class="tile t-docker"><svg class="ic"><use href="#i-docker"/></svg></span>imagen Docker</span>
+          <span class="dep-arr">→</span>
+          <span class="dep-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 13 4 4L19 7"/></svg>health check</span>
+          <span class="dep-arr">→</span>
+          <span class="dep-item live"><i></i>live</span>
+        </div>
+
+        <div class="map-legend">
+          <span><i class="lg-line"></i>pasa por tu app</span>
+          <span><i class="lg-dash"></i>atajo directo</span>
+          <span><i class="lg-dot"></i>empuje en tiempo real</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ flows ══════════════ -->
+  <section class="flows" aria-labelledby="flows-title">
+    <div class="section-head">
+      <div class="eyebrow"><span class="num">02</span> recorridos</div>
+      <h2 class="section-title" id="flows-title">Elige un dato y sigue su viaje.</h2>
+      <p class="section-sub">Cuatro caminos reales. Las mismas piezas, en distinto orden. Toca una pestaña para cambiar el recorrido.</p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Recorridos de datos">
+      <button class="tab" role="tab" id="tab-auth" aria-controls="flow-auth" aria-selected="false" tabindex="-1" style="--tc:#7C3AED">
+        <span class="tile t-auth"><svg class="ic"><use href="#i-betterauth"/></svg></span>Entrar
+      </button>
+      <button class="tab" role="tab" id="tab-publish" aria-controls="flow-publish" aria-selected="true" tabindex="0" style="--tc:#0F766E">
+        <span class="tile t-supabase"><svg class="ic"><use href="#i-supabase"/></svg></span>Publicar
+      </button>
+      <button class="tab" role="tab" id="tab-feed" aria-controls="flow-feed" aria-selected="false" tabindex="-1" style="--tc:#0369A1">
+        <span class="tile t-redis"><svg class="ic"><use href="#i-redis"/></svg></span>Ver feed
+      </button>
+      <button class="tab" role="tab" id="tab-like" aria-controls="flow-like" aria-selected="false" tabindex="-1" style="--tc:#BE123C">
+        <span class="tile t-socket"><svg class="ic"><use href="#i-socketdotio"/></svg></span>Like en vivo
+      </button>
+    </div>
+
+    <!-- AUTH -->
+    <div class="flow-panel" role="tabpanel" id="flow-auth" aria-labelledby="tab-auth" style="--fc:#7C3AED" hidden>
+      <div class="flow-top">
+        <div>
+          <div class="flow-kicker">recorrido 01 · identidad</div>
+          <h3 class="flow-title">Entrar sin regalar la sesión.</h3>
+          <p class="flow-sum">Better Auth convierte credenciales en una cookie segura. Prisma guarda la identidad; Redis la acelera.</p>
+        </div>
+        <span class="flow-count">6 pasos</span>
+      </div>
+      <ol class="steps">
+        <li class="step" style="--c:#0891B2">
+          <span class="step-dot">01</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-react"><svg class="ic"><use href="#i-react"/></svg></span>Cliente <span class="arrow">·</span> React</div>
+            <p>Email + contraseña o «Continuar con Google». Nada sensible se guarda en el navegador.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#14B8A6">
+          <span class="step-dot">02</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-render"><svg class="ic"><use href="#i-render"/></svg></span>Render <span class="arrow">→</span><span class="tile t-next"><svg class="ic"><use href="#i-nextdotjs"/></svg></span>Next.js</div>
+            <p><code>POST /api/auth/[...all]</code> entra por HTTPS. Render termina el TLS y lo enruta al contenedor.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#2563EB">
+          <span class="step-dot">03</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-zod"><svg class="ic"><use href="#i-zod"/></svg></span>Zod</div>
+            <p>Valida el body: formato de email, longitud de contraseña y provider permitido. Si falla, 400 antes de tocar la base.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#8B5CF6">
+          <span class="step-dot">04</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-auth"><svg class="ic"><use href="#i-betterauth"/></svg></span>Better Auth</div>
+            <p>Verifica credenciales u OAuth, crea la sesión y firma una cookie <code>httpOnly</code> + <code>Secure</code>.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#0D9488">
+          <span class="step-dot">05</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-prisma"><svg class="ic"><use href="#i-prisma"/></svg></span>Prisma <span class="arrow">→</span><span class="tile t-neon"><svg class="ic"><use href="#i-neon"/></svg></span>Neon</div>
+            <p>Escribe <code>User</code>, <code>Account</code> y <code>Session</code> en Postgres con queries tipadas y una transacción.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#DC2626">
+          <span class="step-dot">06</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-redis"><svg class="ic"><use href="#i-redis"/></svg></span>Redis <span class="arrow">+</span><span class="tile t-next"><svg class="ic"><use href="#i-nextdotjs"/></svg></span>Next.js</div>
+            <p>Cachea la sesión, limita intentos fallidos y deja pasar las siguientes rutas.</p>
+          </div>
+        </li>
+      </ol>
+      <div class="flow-result"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m5 13 4 4L19 7"/></svg><span><b>Resultado:</b> identidad resuelta. Cada request sabe quién eres sin exponer tokens en localStorage.</span></div>
+    </div>
+
+    <!-- PUBLISH -->
+    <div class="flow-panel" role="tabpanel" id="flow-publish" aria-labelledby="tab-publish" style="--fc:#0D9488">
+      <div class="flow-top">
+        <div>
+          <div class="flow-kicker">recorrido 02 · escritura + archivo</div>
+          <h3 class="flow-title">Una foto, de la galería al feed.</h3>
+          <p class="flow-sum">La imagen va por un camino; los metadatos por otro. Se encuentran en Neon y estallan en el feed por WSS.</p>
+        </div>
+        <span class="flow-count">6 pasos</span>
+      </div>
+      <ol class="steps">
+        <li class="step" style="--c:#0891B2">
+          <span class="step-dot">01</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-react"><svg class="ic"><use href="#i-react"/></svg></span>Cliente <span class="arrow">·</span> React</div>
+            <p>Elige foto y caption. El navegador comprime la imagen y pide permiso para subirla.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#8B5CF6">
+          <span class="step-dot">02</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-auth"><svg class="ic"><use href="#i-betterauth"/></svg></span>Better Auth <span class="arrow">+</span><span class="tile t-zod"><svg class="ic"><use href="#i-zod"/></svg></span>Zod</div>
+            <p><code>POST /api/uploads/sign</code>: la sesión se valida y Zod comprueba tipo, tamaño, extensión y caption.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#059669">
+          <span class="step-dot">03</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-supabase"><svg class="ic"><use href="#i-supabase"/></svg></span>Supabase SDK</div>
+            <p>El servidor firma una URL de subida. La <code>service key</code> nunca sale del contenedor.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#14B8A6">
+          <span class="step-dot">04</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-browser"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg></span>Navegador <span class="arrow">→</span><span class="tile t-supabase"><svg class="ic"><use href="#i-supabase"/></svg></span>Storage</div>
+            <p><code>PUT</code> directo al bucket. La imagen no consume RAM ni ancho de banda de Render.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#0D9488">
+          <span class="step-dot">05</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-prisma"><svg class="ic"><use href="#i-prisma"/></svg></span>Prisma <span class="arrow">→</span><span class="tile t-neon"><svg class="ic"><use href="#i-neon"/></svg></span>Neon</div>
+            <p><code>POST /api/posts</code> guarda el post y la ruta del archivo en una transacción.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#DC2626">
+          <span class="step-dot">06</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-redis"><svg class="ic"><use href="#i-redis"/></svg></span>Redis <span class="arrow">+</span><span class="tile t-socket"><svg class="ic"><use href="#i-socketdotio"/></svg></span>Socket.IO</div>
+            <p>Invalida el feed cacheado y emite <code>post:new</code>; el adapter lo reparte a todas las instancias.</p>
+          </div>
+        </li>
+      </ol>
+      <div class="flow-result"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m5 13 4 4L19 7"/></svg><span><b>Resultado:</b> post publicado y visible al instante para los seguidores conectados.</span></div>
+    </div>
+
+    <!-- FEED -->
+    <div class="flow-panel" role="tabpanel" id="flow-feed" aria-labelledby="tab-feed" style="--fc:#0284C7" hidden>
+      <div class="flow-top">
+        <div>
+          <div class="flow-kicker">recorrido 03 · lectura</div>
+          <h3 class="flow-title">Abrir el feed en milisegundos.</h3>
+          <p class="flow-sum">Redis absorbe la repetición; Neon guarda la verdad. Las imágenes ni siquiera pasan por Render.</p>
+        </div>
+        <span class="flow-count">6 pasos</span>
+      </div>
+      <ol class="steps">
+        <li class="step" style="--c:#0891B2">
+          <span class="step-dot">01</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-react"><svg class="ic"><use href="#i-react"/></svg></span>Cliente <span class="arrow">·</span> React</div>
+            <p>Abre <code>/home</code>. Next.js renderiza en el servidor (RSC) el primer feed.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#8B5CF6">
+          <span class="step-dot">02</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-auth"><svg class="ic"><use href="#i-betterauth"/></svg></span>Better Auth</div>
+            <p>Resuelve la sesión desde la cookie. Sin sesión, redirige al login.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#DC2626">
+          <span class="step-dot">03</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-redis"><svg class="ic"><use href="#i-redis"/></svg></span>Redis</div>
+            <p><code>GET feed:user:{id}</code>: si hay hit, responde en milisegundos.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#0D9488">
+          <span class="step-dot">04</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-prisma"><svg class="ic"><use href="#i-prisma"/></svg></span>Prisma <span class="arrow">→</span><span class="tile t-neon"><svg class="ic"><use href="#i-neon"/></svg></span>Neon</div>
+            <p>Si hay miss, consulta posts, autores, likes y comentarios usando índices.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#DC2626">
+          <span class="step-dot">05</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-redis"><svg class="ic"><use href="#i-redis"/></svg></span>Redis</div>
+            <p>Guarda el resultado con TTL corto (60 s) y sirve el HTML/JSON.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#059669">
+          <span class="step-dot">06</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-supabase"><svg class="ic"><use href="#i-supabase"/></svg></span>Supabase CDN</div>
+            <p>Las imágenes viajan del CDN de Supabase al navegador, no desde Render.</p>
+          </div>
+        </li>
+      </ol>
+      <div class="flow-result"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m5 13 4 4L19 7"/></svg><span><b>Resultado:</b> feed rápido y barato. Redis absorbe la repetición; Neon sigue siendo la verdad.</span></div>
+    </div>
+
+    <!-- LIKE -->
+    <div class="flow-panel" role="tabpanel" id="flow-like" aria-labelledby="tab-like" style="--fc:#E11D48" hidden>
+      <div class="flow-top">
+        <div>
+          <div class="flow-kicker">recorrido 04 · bidireccional</div>
+          <h3 class="flow-title">Un like que llega a todos.</h3>
+          <p class="flow-sum">HTTP escribe el like; Socket.IO lo empuja a la sala del post. Redis hace que todas las instancias se enteren.</p>
+        </div>
+        <span class="flow-count">6 pasos</span>
+      </div>
+      <ol class="steps">
+        <li class="step" style="--c:#0891B2">
+          <span class="step-dot">01</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-react"><svg class="ic"><use href="#i-react"/></svg></span>Cliente <span class="arrow">·</span> React</div>
+            <p>Tap en el corazón. La UI cambia al instante (optimistic UI) y envía el like.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#14B8A6">
+          <span class="step-dot">02</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-render"><svg class="ic"><use href="#i-render"/></svg></span>Render <span class="arrow">→</span><span class="tile t-next"><svg class="ic"><use href="#i-nextdotjs"/></svg></span>Next.js <span class="arrow">+</span><span class="tile t-zod"><svg class="ic"><use href="#i-zod"/></svg></span>Zod</div>
+            <p><code>POST /api/posts/:id/like</code> por HTTPS. Sesión, CSRF y <code>postId</code> validados.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#0D9488">
+          <span class="step-dot">03</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-prisma"><svg class="ic"><use href="#i-prisma"/></svg></span>Prisma <span class="arrow">→</span><span class="tile t-neon"><svg class="ic"><use href="#i-neon"/></svg></span>Neon</div>
+            <p>Inserta el like de forma idempotente y actualiza el contador.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#DC2626">
+          <span class="step-dot">04</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-redis"><svg class="ic"><use href="#i-redis"/></svg></span>Redis</div>
+            <p>Refresca contadores y feed cacheado; registra presencia.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#DB2777">
+          <span class="step-dot">05</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-socket"><svg class="ic"><use href="#i-socketdotio"/></svg></span>Socket.IO</div>
+            <p>La lógica emite <code>like:new</code> a la sala <code>post:{id}</code>.</p>
+          </div>
+        </li>
+        <li class="step" style="--c:#E11D48">
+          <span class="step-dot">06</span>
+          <div class="step-body">
+            <div class="step-tech"><span class="tile t-redis"><svg class="ic"><use href="#i-redis"/></svg></span>Redis adapter <span class="arrow">→</span><span class="tile t-browser"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg></span>Clientes</div>
+            <p>Pub/sub lleva el evento a todas las instancias; los clientes lo reciben por WSS.</p>
+          </div>
+        </li>
+      </ol>
+      <div class="flow-result"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m5 13 4 4L19 7"/></svg><span><b>Resultado:</b> bidireccional de verdad. HTTP escribe; WebSocket empuja.</span></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ rules ══════════════ -->
+  <section class="rules" aria-labelledby="rules-title">
+    <div class="section-head">
+      <div class="eyebrow"><span class="num">03</span> reglas de oro</div>
+      <h2 class="section-title" id="rules-title">Lo que hace que esto funcione.</h2>
+    </div>
+
+    <div class="rules-grid">
+      <article class="rule" style="--rc:#10B981">
+        <span class="rule-ico"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span>
+        <h4>Neon es la verdad. Redis es la velocidad.</h4>
+        <p>Si Redis se cae, la app sigue funcionando más lenta. Si Neon se cae, no hay app. Redis siempre se puede reconstruir.</p>
+      </article>
+
+      <article class="rule" style="--rc:#14B8A6">
+        <span class="rule-ico"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></span>
+        <h4>La imagen no atraviesa el contenedor.</h4>
+        <p>La subida directa a Supabase con URL firmada ahorra RAM, CPU y ancho de banda en Render. El servidor solo firma y guarda la ruta.</p>
+      </article>
+
+      <article class="rule" style="--rc:#3B82F6">
+        <span class="rule-ico"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 6v6c0 4.6 3.4 7.8 8 9 4.6-1.2 8-4.4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+        <h4>TypeScript se borra al compilar. Zod se queda.</h4>
+        <p>Tipa todo lo que puedas, pero valida en runtime todo lo que entra de fuera: formularios, APIs, env vars y webhooks.</p>
+      </article>
+
+      <article class="rule" style="--rc:#EC4899">
+        <span class="rule-ico"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 16 9 5 9-5"/></svg></span>
+        <h4>Dos instancias de Render necesitan el adapter de Redis.</h4>
+        <p>Sin pub/sub, cada Socket.IO solo conoce a sus propios clientes. El adapter convierte varias instancias en un solo canal.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ══════════════ closing ══════════════ -->
+  <section class="closing">
+    <div class="eyebrow">en una frase</div>
+    <p>El navegador <b class="c-violet">pide</b>, Next.js <b class="c-teal">orquesta</b>, Better Auth <b class="c-violet">identifica</b>, Zod <b class="c-blue">valida</b>, Prisma <b class="c-teal">persiste</b> en Neon, Redis <b class="c-rose">acelera</b> y Socket.IO <b class="c-rose">devuelve</b> el cambio a todos.</p>
+  </section>
+
+  <footer class="foot">11 piezas · 3 servicios externos · 1 contenedor · 0 magia</footer>
+
+</main>
+
+<script>
+(() => {
+  const tablist = document.querySelector('[role="tablist"]');
+  if (!tablist) return;
+  const tabs = [...tablist.querySelectorAll('[role="tab"]')];
+  const panels = tabs.map(tab => document.getElementById(tab.getAttribute('aria-controls')));
+
+  function activate(tab, focus) {
+    tabs.forEach((t, i) => {
+      const on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      panels[i].hidden = !on;
+    });
+    if (focus) tab.focus();
+  }
+
+  tabs.forEach(tab => tab.addEventListener('click', () => activate(tab, false)));
+  tablist.addEventListener('keydown', (event) => {
+    const index = tabs.indexOf(document.activeElement);
+    if (index < 0) return;
+    let next = null;
+    if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+    if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+    if (event.key === 'Home') next = 0;
+    if (event.key === 'End') next = tabs.length - 1;
+    if (next !== null) {
+      event.preventDefault();
+      activate(tabs[next], true);
+    }
+  });
+
+  const initial = tabs.find(tab => tab.getAttribute('aria-selected') === 'true') || tabs[0];
+  activate(initial, false);
+})();
+</script>
+</body>
+</html>

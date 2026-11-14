@@ -1,0 +1,44 @@
+# ============================================
+# Development Dockerfile for Next.js
+# ============================================
+ARG NODE_VERSION=24.14.0-slim
+
+FROM node:${NODE_VERSION} AS dev
+
+WORKDIR /app
+
+# Install OpenSSL so Prisma can detect the correct libssl/openssl version
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
+
+# Copy package-related files first to leverage Docker's caching mechanism
+# pnpm-workspace.yaml holds the allowBuilds policy needed for a non-interactive install
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* pnpm-workspace.yaml .npmrc* ./
+
+# Copy Prisma schema: `prisma generate` runs during postinstall and needs it
+COPY prisma ./prisma
+
+RUN --mount=type=cache,target=/root/.npm \
+    --mount=type=cache,target=/usr/local/share/.cache/yarn \
+    --mount=type=cache,target=/root/.local/share/pnpm/store \
+    if [ -f package-lock.json ]; then \
+    npm ci --no-audit --no-fund; \
+    elif [ -f yarn.lock ]; then \
+    corepack enable yarn && yarn install --frozen-lockfile --production=false; \
+    elif [ -f pnpm-lock.yaml ]; then \
+    corepack enable pnpm && pnpm install --frozen-lockfile; \
+    else \
+    echo "No lockfile found." && exit 1; \
+    fi
+
+COPY . .
+
+ENV WATCHPACK_POLLING=true
+ENV HOSTNAME="0.0.0.0"
+
+RUN chown -R node:node /app
+USER node
+
+EXPOSE 3000
+
+CMD ["sh", "-c", "if [ -f package-lock.json ]; then npm run dev; elif [ -f yarn.lock ]; then yarn dev; elif [ -f pnpm-lock.yaml ]; then pnpm dev; else npm run dev; fi"]
