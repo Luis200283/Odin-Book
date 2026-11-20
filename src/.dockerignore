@@ -7,6 +7,10 @@ node_modules/
 # Next.js build output (generated during the image build)
 .next/
 out/
+
+# Prisma client (generated inside the image by `postinstall`; a stale local copy
+# must never overwrite the one generated from the current schema)
+generated/
 dist/
 build/
 .vercel/
