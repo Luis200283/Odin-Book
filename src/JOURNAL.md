@@ -82,12 +82,12 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
+model message {
+  id            Int    @id @default(autoincrement())
+  client_offset String @unique
+  content       String
 }
+
 ```
 
 ```ts
@@ -638,120 +638,81 @@ and test whith:
 node lib/redis.ts
 ```
 
-must be return `Process 134`
+must be return `Process 134`,
 
-# 2. **Next JS**
+31. add [BetterAuth](https://www.prisma.io/docs/guides/authentication/better-auth/nextjs) to ypur ptoject:
 
-Next.js is a React framework that enables server-side rendering, static site generation, and full-stack capabilities.
+```bash
+pnpm add better-auth @better-auth/prisma-adapter
+```
 
-## Folder and file conventions
+and set this enviroment variables:
 
-### Top-level folders
+```.env
+BETTER_AUTH_SECRET=Va3CsDnvgdZAeernNsiq9VnZPnoldxGg
+BETTER_AUTH_URL=http://localhost:3000 # Base URL of your app
+```
 
-Top-level folders are used to organize your application's code and static assets.
+- Note: A secret value used for encryption and hashing. It must be at least 32 characters and generated with high entropy.
 
-|                                                                    |                                    |
-| ------------------------------------------------------------------ | ---------------------------------- |
-| [`app`](/docs/app)                                                 | App Router                         |
-| [`pages`](/docs/pages/building-your-application/routing)           | Pages Router                       |
-| [`public`](/docs/app/api-reference/file-conventions/public-folder) | Static assets to be served         |
-| [`src`](/docs/app/api-reference/file-conventions/src-folder)       | Optional application source folder |
+32. Create a better Auth instance.
+    create a file named auth.ts in this lib/auth.js folder:
 
-### Top-level files
+```ts
+import { betterAuth } from "better-auth/minimal";
+import { prismaAdapter } from "@better-auth/prisma-adapter";
+import { prisma } from "@/db/client";
 
-Top-level files are used to configure your application, manage dependencies, run proxy, integrate monitoring tools, and define environment variables.
+export const auth = betterAuth({
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
+  }),
+});
+```
 
-|                                                                              |                                                                                    |
-| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| **Next.js**                                                                  |                                                                                    |
-| [`next.config.js`](/docs/app/api-reference/config/next-config-js)            | Configuration file for Next.js                                                     |
-| [`package.json`](/docs/app/getting-started/installation#manual-installation) | Project dependencies and scripts                                                   |
-| [`instrumentation.ts`](/docs/app/guides/instrumentation)                     | OpenTelemetry and Instrumentation file                                             |
-| [`proxy.ts`](/docs/app/api-reference/file-conventions/proxy)                 | Next.js request proxy                                                              |
-| [`.env`](/docs/app/guides/environment-variables)                             | Environment variables (should not be tracked by version control)                   |
-| [`.env.local`](/docs/app/guides/environment-variables)                       | Local environment variables (should not be tracked by version control)             |
-| [`.env.production`](/docs/app/guides/environment-variables)                  | Production environment variables (should not be tracked by version control)        |
-| [`.env.development`](/docs/app/guides/environment-variables)                 | Development environment variables (should not be tracked by version control)       |
-| [`eslint.config.mjs`](/docs/app/api-reference/config/eslint)                 | Configuration file for ESLint                                                      |
-| `.gitignore`                                                                 | Git files and folders to ignore                                                    |
-| [`next-env.d.ts`](/docs/app/api-reference/config/typescript#next-envdts)     | TypeScript declaration file for Next.js (should not be tracked by version control) |
-| `tsconfig.json`                                                              | Configuration file for TypeScript                                                  |
-| `jsconfig.json`                                                              | Configuration file for JavaScript                                                  |
+33. create a Better Auth schema whit the CLI tool :
 
-### Routing Files
+```bash
+pnpm dlx auth@latest generate
+pnpm prisma migrate dev --name add-auth-models
+pnpm prisma generate
+```
 
-Add `page` to expose a route, `layout` for shared UI such as header, nav, or footer, `loading` for skeletons, `error` for error boundaries, and `route` for APIs.
+34. In the src/app/api directory, create an auth/[...all] folder structure and a route.ts file inside it:
 
-|                                                                               |                     |                              |
-| ----------------------------------------------------------------------------- | ------------------- | ---------------------------- |
-| [`layout`](/docs/app/api-reference/file-conventions/layout)                   | `.js` `.jsx` `.tsx` | Layout                       |
-| [`page`](/docs/app/api-reference/file-conventions/page)                       | `.js` `.jsx` `.tsx` | Page                         |
-| [`loading`](/docs/app/api-reference/file-conventions/loading)                 | `.js` `.jsx` `.tsx` | Loading UI                   |
-| [`not-found`](/docs/app/api-reference/file-conventions/not-found)             | `.js` `.jsx` `.tsx` | Not found UI                 |
-| [`error`](/docs/app/api-reference/file-conventions/error)                     | `.js` `.jsx` `.tsx` | Error UI                     |
-| [`global-error`](/docs/app/api-reference/file-conventions/error#global-error) | `.js` `.jsx` `.tsx` | Global error UI              |
-| [`route`](/docs/app/api-reference/file-conventions/route)                     | `.js` `.ts`         | API endpoint                 |
-| [`template`](/docs/app/api-reference/file-conventions/template)               | `.js` `.jsx` `.tsx` | Re-rendered layout           |
-| [`default`](/docs/app/api-reference/file-conventions/default)                 | `.js` `.jsx` `.tsx` | Parallel route fallback page |
+```bash
+mkdir -p "app/api/auth/[...all]"
+touch "app/api/auth/[...all]/route.ts"
+```
 
-### Nested routes
+Add the following code to the newly created route.ts file:
 
-Folders define URL segments. Nesting folders nests segments. Layouts at any level wrap their child segments. A route becomes public when a `page` or `route` file exists.
+```ts
+import { auth } from "@/lib/auth";
+import { toNextJsHandler } from "better-auth/next-js";
 
-| Path                        | URL pattern     | Notes                         |
-| --------------------------- | --------------- | ----------------------------- |
-| `app/layout.tsx`            | â€”             | Root layout wraps all routes  |
-| `app/blog/layout.tsx`       | â€”             | Wraps `/blog` and descendants |
-| `app/page.tsx`              | `/`             | Public route                  |
-| `app/blog/page.tsx`         | `/blog`         | Public route                  |
-| `app/blog/authors/page.tsx` | `/blog/authors` | Public route                  |
+export const { POST, GET } = toNextJsHandler(auth);
+```
 
-### Dynamic routes
+In the src/lib directory, create an auth-client.ts file:
 
-Parameterize segments with square brackets. Use `[segment]` for a single param, `[...segment]` for catchâ€‘all, and `[[...segment]]` for optional catchâ€‘all. Access values via the [`params`](/docs/app/api-reference/file-conventions/page#params-optional) prop.
+```ts
+import { createAuthClient } from "better-auth/react";
 
-| Path                            | URL pattern                                                          |
-| ------------------------------- | -------------------------------------------------------------------- |
-| `app/blog/[slug]/page.tsx`      | `/blog/my-first-post`                                                |
-| `app/shop/[...slug]/page.tsx`   | `/shop/clothing`, `/shop/clothing/shirts`                            |
-| `app/docs/[[...slug]]/page.tsx` | `/docs`, `/docs/layouts-and-pages`, `/docs/api-reference/use-router` |
+export const { signIn, signUp, signOut, useSession } = createAuthClient();
+```
 
-### Route groups and private folders
+35. Next, build the user interface for authentication. In the src/app directory, create the following folder structure:
 
-Organize code without changing URLs with route groups [`(group)`](/docs/app/api-reference/file-conventions/route-groups#convention), and colocate non-routable files with private folders [`_folder`](#private-folders).
+- app/sign-up/page.tsx
+- app/sign-in/page.tsx
+- app/dashboard/page.tsx
 
-| Path                            | URL pattern | Notes                                     |
-| ------------------------------- | ----------- | ----------------------------------------- |
-| `app/(marketing)/page.tsx`      | `/`         | Group omitted from URL                    |
-| `app/(shop)/cart/page.tsx`      | `/cart`     | Share layouts within `(shop)`             |
-| `app/blog/_components/Post.tsx` | â€”         | Not routable; safe place for UI utilities |
-| `app/blog/_lib/data.ts`         | â€”         | Not routable; safe place for utils        |
+```bash
+mkdir -p app/{sign-up,sign-in,dashboard}
+touch app/{sign-up,sign-in,dashboard}/page.tsx
+```
 
-### Parallel and Intercepted Routes
-
-These features fit specific UI patterns, such as slot-based layouts or modal routing.
-
-Use `@slot` for named slots rendered by a parent layout. Use intercept patterns to render another route inside the current layout without changing the URL, for example, to show a details view as a modal over a list.
-
-| Pattern (docs)                                                                              | Meaning              | Typical use case                         |
-| ------------------------------------------------------------------------------------------- | -------------------- | ---------------------------------------- |
-| [`@folder`](/docs/app/api-reference/file-conventions/parallel-routes#slots)                 | Named slot           | Sidebar + main content                   |
-| [`(.)folder`](/docs/app/api-reference/file-conventions/intercepting-routes#convention)      | Intercept same level | Preview sibling route in a modal         |
-| [`(..)folder`](/docs/app/api-reference/file-conventions/intercepting-routes#convention)     | Intercept parent     | Open a child of the parent as an overlay |
-| [`(..)(..)folder`](/docs/app/api-reference/file-conventions/intercepting-routes#convention) | Intercept two levels | Deeply nested overlay                    |
-| [`(...)folder`](/docs/app/api-reference/file-conventions/intercepting-routes#convention)    | Intercept from root  | Show arbitrary route in current view     |
-
-### Metadata file conventions
-
-#### App icons
-
-|                                                                                                                 |                                     |                          |
-| --------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------------------ |
-| [`favicon`](/docs/app/api-reference/file-conventions/metadata/app-icons#favicon)                                | `.ico`                              | Favicon file             |
-| [`icon`](/docs/app/api-reference/file-conventions/metadata/app-icons#icon)                                      | `.ico` `.jpg` `.jpeg` `.png` `.svg` | App Icon file            |
-| [`icon`](/docs/app/api-reference/file-conventions/metadata/app-icons#generate-icons-using-code-js-ts-tsx)       | `.js` `.ts` `.tsx`                  | Generated App Icon       |
-| [`apple-icon`](/docs/app/api-reference/file-conventions/metadata/app-icons#apple-icon)                          | `.jpg` `.jpeg` `.png`               | Apple App Icon file      |
-| [`apple-icon`](/docs/app/api-reference/file-conventions/metadata/app-icons#generate-icons-using-code-js-ts-tsx) | `.js` `.ts` `.tsx`                  | Generated Apple App Icon |
 
 ## Redis
 
