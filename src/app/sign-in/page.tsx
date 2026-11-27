@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/lib/auth-client";
+import { signIn, googleSignIn } from "@/lib/auth-client";
+import { GoogleIcon } from "@/components/icons/googleIcon";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function SignInPage() {
     if (res.error) {
       setError(res.error.message || "Somthing went wrong.");
     } else {
-      router.push("/dashboard");
+      router.push("/home");
     }
   }
 
@@ -50,6 +51,13 @@ export default function SignInPage() {
           Sign In
         </button>{" "}
       </form>{" "}
+      <button
+        onClick={googleSignIn}
+        className="flex items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
+      >
+        <GoogleIcon />
+        <span>Continuar con Google</span>
+      </button>
     </main>
   );
 }
